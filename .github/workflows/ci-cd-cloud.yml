@@ -1,4 +1,4 @@
-name: "CI/CD Cloud Pipeline - ApiCliente (Java 21 + JaCoCo 100% + Semgrep SAST + Cloud IaC)"
+name: "CI/CD Cloud Pipeline - ApiCliente (Java 21 + JaCoCo 100% + SonarQube Cloud + Semgrep + Cloud IaC)"
 
 on:
   push:
@@ -7,11 +7,13 @@ on:
 
 jobs:
   build-test-jacoco:
-    name: "1. Compilación Java 21, Pruebas Surefire y Cobertura JaCoCo 100%"
+    name: "1. Compilación Java 21, Surefire, JaCoCo 100% y SonarQube Cloud"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Código Fuente (GitHub SCM)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configurar OpenJDK 21 LTS (Eclipse Temurin) y Cache Maven
         uses: actions/setup-java@v4
@@ -19,6 +21,13 @@ jobs:
           distribution: "temurin"
           java-version: "21"
           cache: "maven"
+
+      - name: Cache SonarQube Cloud Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       - name: Verificar Versiones de Java 21 y Maven 3.9+
         run: |
@@ -39,6 +48,17 @@ jobs:
           print(f"JaCoCo Coverage Summary -> Covered Methods: {covered_methods}/{covered_methods + missed_methods} (100.0%)")
           assert missed_methods == 0, f"Expected 0 missed methods, got {missed_methods}"
           EOF
+
+      - name: Análisis de Calidad y Seguridad en SonarQube Cloud (sonar-maven-plugin 5.5.0.6356)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.organization=miguelalvarezibarra
+          -Dsonar.projectKey=MiguelAlvarezIbarra_ApiCliente
+          -Dsonar.qualitygate.wait=true
 
       - name: Archivar Reporte HTML/XML/CSV JaCoCo 100% y JAR en GitHub Cloud
         uses: actions/upload-artifact@v4

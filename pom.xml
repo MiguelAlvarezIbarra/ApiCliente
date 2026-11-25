@@ -22,6 +22,9 @@
 		<jacoco.version>0.8.12</jacoco.version>
 		<surefire.version>3.2.5</surefire.version>
 		<sonar.maven.version>5.5.0.6356</sonar.maven.version>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.organization>miguelalvarezibarra</sonar.organization>
+		<sonar.projectKey>MiguelAlvarezIbarra_ApiCliente</sonar.projectKey>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<sonar.exclusions>**/target/**,**/Ejercicio5ClienteApplication.java</sonar.exclusions>
